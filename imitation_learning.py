@@ -211,8 +211,7 @@ def parse_message(message):
     s = np.array(s)
 
     return ob, s
-    
-if __name__ == "__main__":
+def test_via_network():
     import time 
     import redis
     import base64
@@ -242,26 +241,29 @@ if __name__ == "__main__":
             imgplot=plt.imshow(s)
             plt.show()
 
-    # model = ImitationLearning()
-    # test_data = np.load('./data17.npz')
-    # imgs = test_data['image']
-    # data = test_data['data']
+if __name__ == "__main__":
+    import time
 
-    # for i, _img in enumerate(imgs):
-    #     _data = data[i]
+    model = ImitationLearning()
+    test_data = np.load('./data17.npz')
+    imgs = test_data['image']
+    data = test_data['data']
 
-    #     speed = _data[7]
-    #     a = time.time()
-    #     control = model._compute_action(_img, speed)
-    #     # print(time.time() - a)
-    #     ground_truth = {
-    #         'steer':_data[0],
-    #         'acc':_data[1],
-    #         'brake':_data[2]
-    #     }
-    #     print("ct",control)
-    #     print("gt",ground_truth)
-    #     print(_data)
-    #     # exit(-1)
+    for i, _img in enumerate(imgs):
+        _data = data[i]
 
-    # model._compute_action(img, speed)
+        speed = _data[7]
+        a = time.time()
+        control = model._compute_action(_img, speed)
+        # print(time.time() - a)
+        ground_truth = {
+            'steer':_data[0],
+            'acc':_data[1],
+            'brake':_data[2]
+        }
+        print("ct",control)
+        # print("gt",ground_truth)
+        # print(_data)
+        # exit(-1)
+
+    model._compute_action(img, speed)

@@ -40,8 +40,16 @@ samplesPerEpoch = 500
 L2NormConst = 0.001
 trainScratch = True
 
+# read an example h5 file
+datasetDirTrain = './data/Train/'
+datasetDirVal = './data/Val/'
+
+
+datasetFilesTrain = glob.glob(datasetDirTrain+'*.npz')
+datasetFilesVal = glob.glob(datasetDirVal+'*.npz')
+
 # Configurations
-num_images = 200 * 4 # 657800 # 200 * 3289
+num_images = 200 * len(datasetFilesTrain) # 657800 # 200 * 3289
 memory_fraction=0.25
 image_cut=[115, 510]
 dropoutVec = [1.0] * 8 + [0.7] * 2 + [0.5] * 2 + [0.5] * 1 + [0.5, 1.] * 5
@@ -64,7 +72,7 @@ params = [trainScratch, dropoutVec, image_cut, learningRate, beta1, beta2, num_i
 
 # GPU configuration
 config = tf.ConfigProto(allow_soft_placement = True)
-# config.gpu_options.visible_device_list = '0'
+config.gpu_options.visible_device_list = '0'
 # config.gpu_options.per_process_gpu_memory_fraction = memory_fraction
 
 # vpcom Special function for visualization
@@ -88,13 +96,7 @@ def plotSpecialTool(data,labels,samples2Visualize=12,factors=[2,6], grayFlag=Fal
 
 
 
-# read an example h5 file
-datasetDirTrain = './data/Train/'
-datasetDirVal = './data/Val/'
 
-
-datasetFilesTrain = glob.glob(datasetDirTrain+'*.npz')
-datasetFilesVal = glob.glob(datasetDirVal+'*.npz')
 
 print("Len train:{0},len val{1}".format(len(datasetFilesTrain),len(datasetFilesVal)))
 
@@ -630,7 +632,7 @@ with sessGraph.as_default():
                 if steps % 10000 == 0 and steps != 0:
                     # finish the training
                     break
-            if epoch % 20 == 0 and epoch > 0:
+            if epoch % 2 == 0 and epoch > 0:
                 # finish the training
                 # print('Finalize the training and Save Checkpoint ...')
                 if not os.path.exists(modelPath):
