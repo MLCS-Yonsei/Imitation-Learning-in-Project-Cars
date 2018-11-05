@@ -207,7 +207,7 @@ if __name__ == "__main__":
         speed = _data[7]
         a = time.time()
         control = model._compute_action(_img, speed)
-        print(time.time() - a)
+        # print(time.time() - a)
         ground_truth = {
             'steer':_data[0],
             'acc':_data[1],
@@ -215,7 +215,7 @@ if __name__ == "__main__":
         }
         print("ct",control)
         print("gt",ground_truth)
-        print(_data)
+        # print(_data)
         # exit(-1)
 
     # model._compute_action(img, speed)

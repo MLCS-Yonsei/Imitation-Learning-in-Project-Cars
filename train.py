@@ -582,50 +582,50 @@ with sessGraph.as_default():
                     print(j % 250, '  Save Checkpoint ...')
                     if not os.path.exists(modelPath):
                         os.makedirs(modelPath)
-                    checkpoint_path = os.path.join(modelPath, "model.ckpt")
+                    checkpoint_path = os.path.join(modelPath, "model_loss_"+str(loss_value)+".ckpt")
                     filename = saver.save(sess, checkpoint_path)
                     print("  Model saved in file: %s" % filename)
 
-                if steps % 50000 == 0 and steps != 0:  # every 50000 step, multiply learning rate by half
-                    print("Half the learning rate ....")
-                    solverList = []
-                    lossList = []
-                    trainVars = tf.trainable_variables()
-                    for i in range(0, len(branchConfig)):
-                        with tf.name_scope("Branch_" + str(i)):
-                            if branchConfig[i][0] == "Speed":
-                                # we only use the image as input to speed prediction
-                                # if not (j == 0):
-                                # [ inputs['inputImages','inputData'], targets['targetSpeed', 'targetController'],  'params', dropoutVec', output[optimizers, losses, branchesOutputs] ]
-                                # params = [trainScratch, dropoutVec, image_cut, learningRate, beta1, beta2, num_images, iterNum, batchSize, valBatchSize, NseqVal, epochs, samplesPerEpoch, L2NormConst]
-                                params[3] = params[3] * 0.5  # update Learning Rate
-                                contLoss = tf.reduce_mean(tf.square(
-                                    tf.subtract(netTensors['output']['branchesOutputs'][-1], netTensors['targets'][
-                                        0])))  # + tf.add_n([tf.nn.l2_loss(v) for v in trainVars]) * L2NormConst
-                                contSolver = tf.train.AdamOptimizer(learning_rate=params[3], beta1=params[4],
-                                                                    beta2=params[5]).minimize(contLoss)
-                                solverList.append(contSolver)
-                                lossList.append(contLoss)
-                                # create a summary to monitor cost tensor
-                                tf.summary.scalar("Speed_Loss", contLoss)
-                            else:
-                                # if not (j == 0):
-                                params[3] = params[3] * 0.5
-                                contLoss = tf.reduce_mean(tf.square(
-                                    tf.subtract(netTensors['output']['branchesOutputs'][i], netTensors['targets'][
-                                        1])))  # + tf.add_n([tf.nn.l2_loss(v) for v in trainVars]) * L2NormConst
-                                contSolver = tf.train.AdamOptimizer(learning_rate=params[3], beta1=params[4],
-                                                                    beta2=params[5]).minimize(contLoss)
-                                solverList.append(contSolver)
-                                lossList.append(contLoss)
-                                tf.summary.scalar("Control_Loss_Branch_" + str(i), contLoss)
+                # if steps % 3000 == 0 and steps != 0:  # every 50000 step, multiply learning rate by half
+                #     print("Half the learning rate ....")
+                #     solverList = []
+                #     lossList = []
+                #     trainVars = tf.trainable_variables()
+                #     for i in range(0, len(branchConfig)):
+                #         with tf.name_scope("Branch_" + str(i)):
+                #             if branchConfig[i][0] == "Speed":
+                #                 # we only use the image as input to speed prediction
+                #                 # if not (j == 0):
+                #                 # [ inputs['inputImages','inputData'], targets['targetSpeed', 'targetController'],  'params', dropoutVec', output[optimizers, losses, branchesOutputs] ]
+                #                 # params = [trainScratch, dropoutVec, image_cut, learningRate, beta1, beta2, num_images, iterNum, batchSize, valBatchSize, NseqVal, epochs, samplesPerEpoch, L2NormConst]
+                #                 params[3] = params[3] * 0.5  # update Learning Rate
+                #                 contLoss = tf.reduce_mean(tf.square(
+                #                     tf.subtract(netTensors['output']['branchesOutputs'][-1], netTensors['targets'][
+                #                         0])))  # + tf.add_n([tf.nn.l2_loss(v) for v in trainVars]) * L2NormConst
+                #                 contSolver = tf.train.AdamOptimizer(learning_rate=params[3], beta1=params[4],
+                #                                                     beta2=params[5]).minimize(contLoss)
+                #                 solverList.append(contSolver)
+                #                 lossList.append(contLoss)
+                #                 # create a summary to monitor cost tensor
+                #                 tf.summary.scalar("Speed_Loss", contLoss)
+                #             else:
+                #                 # if not (j == 0):
+                #                 params[3] = params[3] * 0.5
+                #                 contLoss = tf.reduce_mean(tf.square(
+                #                     tf.subtract(netTensors['output']['branchesOutputs'][i], netTensors['targets'][
+                #                         1])))  # + tf.add_n([tf.nn.l2_loss(v) for v in trainVars]) * L2NormConst
+                #                 contSolver = tf.train.AdamOptimizer(learning_rate=params[3], beta1=params[4],
+                #                                                     beta2=params[5]).minimize(contLoss)
+                #                 solverList.append(contSolver)
+                #                 lossList.append(contLoss)
+                #                 tf.summary.scalar("Control_Loss_Branch_" + str(i), contLoss)
 
-                    # update new Losses and Optimizers
-                    print('Initialize Variables in the Graph ...')
-                    # merge all summaries into a single op
-                    merged_summary_op = tf.summary.merge_all()
-                    sess.run(tf.global_variables_initializer())
-                    saver.restore(sess, "test/model.ckpt")  # restore trained parameters
+                #     # update new Losses and Optimizers
+                #     print('Initialize Variables in the Graph ...')
+                #     # merge all summaries into a single op
+                #     merged_summary_op = tf.summary.merge_all()
+                #     sess.run(tf.global_variables_initializer())
+                #     saver.restore(sess, "test/model.ckpt")  # restore trained parameters
 
                 if steps % 10000 == 0 and steps != 0:
                     # finish the training
@@ -635,7 +635,7 @@ with sessGraph.as_default():
                 # print('Finalize the training and Save Checkpoint ...')
                 if not os.path.exists(modelPath):
                     os.makedirs(modelPath)
-                checkpoint_path = os.path.join(modelPath, "model.ckpt")
+                checkpoint_path = os.path.join(modelPath, "model_loss_"+str(loss_value)+".ckpt")
                 filename = saver.save(sess, checkpoint_path)
                 print("  Model saved in file: %s" % filename)
                 
