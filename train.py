@@ -35,7 +35,7 @@ batchSize = 120 # size of batch
 valBatchSize = 120 # size of batch for validation set
 NseqVal = 5  # number of sequences to use for validation
 # training parameters
-epochs = 100
+epochs = 10000
 samplesPerEpoch = 500
 L2NormConst = 0.001
 trainScratch = True
@@ -630,15 +630,15 @@ with sessGraph.as_default():
                 if steps % 10000 == 0 and steps != 0:
                     # finish the training
                     break
-            if steps % 10000 == 0 and steps != 0:
+            if epoch % 20 == 0:
                 # finish the training
-                print('Finalize the training and Save Checkpoint ...')
+                # print('Finalize the training and Save Checkpoint ...')
                 if not os.path.exists(modelPath):
                     os.makedirs(modelPath)
                 checkpoint_path = os.path.join(modelPath, "model.ckpt")
                 filename = saver.save(sess, checkpoint_path)
                 print("  Model saved in file: %s" % filename)
-                break
+                
 
             tStopEpoch = time.time()
             print ("  Epoch Time Cost:", round(tStopEpoch - tStartEpoch, 2), "s")
