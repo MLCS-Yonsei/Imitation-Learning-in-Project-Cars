@@ -47,7 +47,7 @@ image_cut=[115, 510]
 dropoutVec = [1.0] * 8 + [0.7] * 2 + [0.5] * 2 + [0.5] * 1 + [0.5, 1.] * 5
 prefSize = _image_size = (150, 200, 3)
 #batchSize = 120
-learningRate = 0.0002 # multiplied by 0.5 every 50000 mini batch
+learningRate = 0.0001 # multiplied by 0.5 every 50000 mini batch
 iterNum = 294000
 beta1 = 0.7
 beta2 = 0.85
@@ -582,7 +582,7 @@ with sessGraph.as_default():
                     print(j % 250, '  Save Checkpoint ...')
                     if not os.path.exists(modelPath):
                         os.makedirs(modelPath)
-                    checkpoint_path = os.path.join(modelPath, "model_loss_"+str(loss_value)+".ckpt")
+                    checkpoint_path = os.path.join(modelPath,"model_loss_"+ str(epoch) +  "_" + str(loss_value)+".ckpt")
                     filename = saver.save(sess, checkpoint_path)
                     print("  Model saved in file: %s" % filename)
 
@@ -630,12 +630,12 @@ with sessGraph.as_default():
                 if steps % 10000 == 0 and steps != 0:
                     # finish the training
                     break
-            if epoch % 20 == 0:
+            if epoch % 20 == 0 and epoch > 0:
                 # finish the training
                 # print('Finalize the training and Save Checkpoint ...')
                 if not os.path.exists(modelPath):
                     os.makedirs(modelPath)
-                checkpoint_path = os.path.join(modelPath, "model_loss_"+str(loss_value)+".ckpt")
+                checkpoint_path = os.path.join(modelPath, "model_loss_"+ str(epoch) +  "_" + str(loss_value)+".ckpt")
                 filename = saver.save(sess, checkpoint_path)
                 print("  Model saved in file: %s" % filename)
                 

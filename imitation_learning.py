@@ -85,8 +85,8 @@ class ImitationLearning():
 
         ckpt = tf.train.get_checkpoint_state(self._models_path)
         if ckpt:
-            from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoint_file
-            print_tensors_in_checkpoint_file(file_name=ckpt.model_checkpoint_path, all_tensors=False, tensor_name='')
+            # from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoint_file
+            # print_tensors_in_checkpoint_file(file_name=ckpt.model_checkpoint_path, all_tensors=False, tensor_name='')
             print('Restoring from ', ckpt.model_checkpoint_path)
             saver.restore(self._sess, ckpt.model_checkpoint_path)
         else:
@@ -122,8 +122,8 @@ class ImitationLearning():
             brake = 0.0
 
         # We limit speed to 35 km/h to avoid
-        if speed > 10.0 and brake == 0.0:
-            acc = 0.0
+        # if speed > 10.0 and brake == 0.0:
+        #     acc = 0.0
 
         # control = Control()
         # control.steer = steer
@@ -193,29 +193,75 @@ class ImitationLearning():
 
         return predicted_steers, predicted_acc, predicted_brake
 
+def parse_message(message):
+    # Parse message from data_sender.py via redis
+    message = message.decode("utf-8")
+    message = message.replace('<','\'<')
+    message = message.replace('>','>\'')
+
+    msg = eval(message)
+    ob = msg['game_data']
+    s = msg['image_data']
+
+    # Decode image within base64 
+    s = base64.b64decode(s)
+    s = Image.open(BytesIO(s))
+
+    # s = s.resize((576,160), Image.ANTIALIAS)
+    s = np.array(s)
+
+    return ob, s
+    
 if __name__ == "__main__":
     import time 
+    import redis
+    import base64
+    from PIL import Image
+    from io import BytesIO
+
+    r = redis.StrictRedis(host='redis.hwanmoo.kr', port=6379, db=1)
+    target_ip = "192.168.0.56"
 
     model = ImitationLearning()
-    test_data = np.load('./data17.npz')
-    imgs = test_data['image']
-    data = test_data['data']
+    while True:
+        message = r.hget('pcars_data'+target_ip,target_ip)
+        # print(message)
+        if message:
+            r.hdel('pcars_data'+target_ip,target_ip)
+            ob, s = parse_message(message)
 
-    for i, _img in enumerate(imgs):
-        _data = data[i]
+            control = model._compute_action(s, ob)
+            print("ct",control)
 
-        speed = _data[7]
-        a = time.time()
-        control = model._compute_action(_img, speed)
-        # print(time.time() - a)
-        ground_truth = {
-            'steer':_data[0],
-            'acc':_data[1],
-            'brake':_data[2]
-        }
-        print("ct",control)
-        print("gt",ground_truth)
-        # print(_data)
-        # exit(-1)
+            import matplotlib.pyplot as plt
+            import matplotlib.image as mpimg
+            import numpy as np
+
+            # end
+            # from now on you can use img as an image, but make sure you know what you are doing!
+            imgplot=plt.imshow(s)
+            plt.show()
+
+    # model = ImitationLearning()
+    # test_data = np.load('./data17.npz')
+    # imgs = test_data['image']
+    # data = test_data['data']
+
+    # for i, _img in enumerate(imgs):
+    #     _data = data[i]
+
+    #     speed = _data[7]
+    #     a = time.time()
+    #     control = model._compute_action(_img, speed)
+    #     # print(time.time() - a)
+    #     ground_truth = {
+    #         'steer':_data[0],
+    #         'acc':_data[1],
+    #         'brake':_data[2]
+    #     }
+    #     print("ct",control)
+    #     print("gt",ground_truth)
+    #     print(_data)
+    #     # exit(-1)
 
     # model._compute_action(img, speed)
