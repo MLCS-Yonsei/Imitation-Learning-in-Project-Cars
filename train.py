@@ -389,50 +389,51 @@ def controlNet(inputs, targets, shape, dropoutVec, branchConfig, params, scopeNa
         phase: placeholder for training
         scopeName: TensorFlow Scope Name to separate nets in the graph
     """
-    with tf.variable_scope(scopeName) as scope:
-        with tf.name_scope("Network"):
-            networkTensor = load_imitation_learning_network(inputs[0], inputs[1],
-                                                            shape[1:3], dropoutVec)
-            """
-            Now it works as multiplication of one hot encoded mask and reducing sum of losses.
-            Could be also possilbe to do something like that:
-  
-            def f0(): return tf.square(tf.subtract(networkTensor[0], targets[0])
-            def f1(): return tf.square(tf.subtract(networkTensor[1], targets[1]))
-            ... other two branches ...
-            b =  inputs[1][0] # branch number 
-            # construct case operation in graph
-            conditioned_loss = tf.case({tf.equal(b, tf.constant(0)): f0, tf.equal(b, tf.constant(1)): f1,
-                      ... },
-                      default=f3, exclusive=True)
-            ..minimize(conditioned_loss)
+    # with tf.variable_scope(scopeName) as scope:
+        # with tf.name_scope("Network"):
+    # with tf.variable_scope("Network") as scope:
+    networkTensor = load_imitation_learning_network(inputs[0], inputs[1],
+                                                    shape[1:3], dropoutVec)
+    """
+    Now it works as multiplication of one hot encoded mask and reducing sum of losses.
+    Could be also possilbe to do something like that:
 
-            That should be enough. I tested this approach in another project, should work here too.  
-            """
-            parts = []
-            for i in range(0, len(branchConfig)):
-                with tf.name_scope("Branch_" + str(i)):
-                    print("BranchConfig[i]:", branchConfig[i])
-                    if branchConfig[i][0] == "Speed":
-                        part = tf.square(tf.subtract(networkTensor[-1], targets[0]))
-                    else:
-                        part = tf.square(tf.subtract(networkTensor[i], targets[1]))
+    def f0(): return tf.square(tf.subtract(networkTensor[0], targets[0])
+    def f1(): return tf.square(tf.subtract(networkTensor[1], targets[1]))
+    ... other two branches ...
+    b =  inputs[1][0] # branch number 
+    # construct case operation in graph
+    conditioned_loss = tf.case({tf.equal(b, tf.constant(0)): f0, tf.equal(b, tf.constant(1)): f1,
+                ... },
+                default=f3, exclusive=True)
+    ..minimize(conditioned_loss)
 
-                    parts.append(part)
+    That should be enough. I tested this approach in another project, should work here too.  
+    """
+    parts = []
+    for i in range(0, len(branchConfig)):
+        with tf.name_scope("Branch_" + str(i)):
+            print("BranchConfig[i]:", branchConfig[i])
+            if branchConfig[i][0] == "Speed":
+                part = tf.square(tf.subtract(networkTensor[-1], targets[0]))
+            else:
+                part = tf.square(tf.subtract(networkTensor[i], targets[1]))
 
-            means = tf.convert_to_tensor(parts)
-            mask = tf.convert_to_tensor(inputs[1][0])
-            pr = tf.Print(mask, [mask], summarize=8) # one hot vector of branch num % 4 (e.g. for 5: [0,1,0,0])
-            print("mask.get_shape():",mask.get_shape())
-            contLoss = tf.reduce_sum(tf.multiply(tf.reduce_mean(means), mask)) # e.g. sets to 0 all branches except 5 
-            contSolver = tf.train.AdamOptimizer(learning_rate=params[3],
-                                                beta1=params[4], beta2=params[5]).minimize(contLoss)
-        tensors = {
-            'optimizers': contSolver,
-            'losses': contLoss,
-            'output': networkTensor,
-            'print': pr
-        }
+            parts.append(part)
+
+    means = tf.convert_to_tensor(parts)
+    mask = tf.convert_to_tensor(inputs[1][0])
+    pr = tf.Print(mask, [mask], summarize=8) # one hot vector of branch num % 4 (e.g. for 5: [0,1,0,0])
+    print("mask.get_shape():",mask.get_shape())
+    contLoss = tf.reduce_sum(tf.multiply(tf.reduce_mean(means), mask)) # e.g. sets to 0 all branches except 5 
+    contSolver = tf.train.AdamOptimizer(learning_rate=params[3],
+                                        beta1=params[4], beta2=params[5]).minimize(contLoss)
+    tensors = {
+        'optimizers': contSolver,
+        'losses': contLoss,
+        'output': networkTensor,
+        'print': pr
+    }
     return tensors
 
 
