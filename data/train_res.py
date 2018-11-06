@@ -50,18 +50,16 @@ img_channels = 3
 # (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 dataset = glob('./data/*.npz')
 _len = len(dataset)
+X = np.zeros((200*_len,150,200,3))
+XS = np.zeros((200*_len))
+y = np.zeros((200*_len,3))
 for i, data in enumerate(dataset):
     print(i,"/",_len)
     _data = np.load(data)
 
-    try:
-        X = np.concatenate((X,_data['image']),axis=0)
-        XS = np.concatenate((XS,_data['data'][:,7]))
-        y = np.concatenate((y,_data['data'][:,0:3]))
-    except:
-        X = _data['image']
-        XS = _data['data'][:,7]
-        y = _data['data'][:,0:3]
+    X[200*i:200*(i+1)] = _data['image'][:,:,:,:]
+    XS[200*i:200*(i+1)] = _data['data'][:,7]
+    y[200*i:200*(i+1)] = _data['data'][:,0:3]
 
 X_test, X_train = np.split(X, [int(0.2 * X.shape[0])])
 print("X_test", X_test.shape, "X_train", X_train.shape)
