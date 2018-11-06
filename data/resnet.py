@@ -243,11 +243,11 @@ class ResnetBuilder(object):
                       activation="relu")(joint)
         print(joint)
         steer = Dense(units=1, kernel_initializer="glorot_normal",
-                      activation="relu", name="steer")(joint)
+                      name="steer")(joint)
         acc = Dense(units=1, kernel_initializer="glorot_normal",
-                      activation="relu", name="acc")(joint)
+                      name="acc")(joint)
         brake = Dense(units=1, kernel_initializer="glorot_normal",
-                      activation="relu", name="brake")(joint)
+                      name="brake")(joint)
 
 
         model = Model(inputs=[image_input,speed_input], outputs=[steer,acc,brake])
