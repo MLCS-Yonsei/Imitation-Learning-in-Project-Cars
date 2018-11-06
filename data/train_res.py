@@ -9,7 +9,7 @@ from __future__ import print_function
 from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
-from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
+from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping, ModelCheckpoint
 
 import numpy as np
 import resnet
@@ -35,6 +35,7 @@ seq = iaa.Sequential([
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
 early_stopper = EarlyStopping(min_delta=0.001, patience=10)
 csv_logger = CSVLogger('resnet18_cifar10.csv')
+model_checkpoint = ModelCheckpoint('resnet.hdf5', monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
 
 batch_size = 16
 nb_classes = 3
@@ -107,4 +108,4 @@ else:
                         steps_per_epoch=X_train.shape[0] // batch_size,
                         validation_data=([X_test, XS_train], y_test),
                         epochs=nb_epoch, verbose=1, max_q_size=100,
-                        callbacks=[lr_reducer, early_stopper, csv_logger])
+                        callbacks=[lr_reducer, early_stopper, csv_logger, model_checkpoint])
