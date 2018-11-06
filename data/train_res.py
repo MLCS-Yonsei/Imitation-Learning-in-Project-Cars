@@ -89,8 +89,8 @@ model.compile(loss='mean_squared_error',
 
 if data_augmentation:
     print('Using data augmentation.')
-    X_train = seq.augment_images(X_train)
-
+    # X_train = seq.augment_images(X_train)
+    print('Done')
     model.fit([X_train, XS_train], np.split(y_train,3,axis=1),
               batch_size=batch_size,
               nb_epoch=nb_epoch,
