@@ -97,7 +97,7 @@ if data_augmentation:
               nb_epoch=nb_epoch,
               validation_data=([X_test, XS_test], np.split(y_test,3,axis=1)),
               shuffle=True,
-              callbacks=[lr_reducer, early_stopper, csv_logger])
+              callbacks=[lr_reducer, early_stopper, csv_logger, model_checkpoint])
 else:
     print('Using real-time data augmentation.')
     # This will do preprocessing and realtime data augmentation:
