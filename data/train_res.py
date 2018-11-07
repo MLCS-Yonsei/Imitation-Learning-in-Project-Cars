@@ -62,11 +62,11 @@ for i, data in enumerate(dataset):
     XS[200*i:200*(i+1)] = _data['data'][:,7]
     y[200*i:200*(i+1)] = _data['data'][:,0:3]
 
-X_test, X_train = np.split(X, [int(0.2 * X.shape[0])])
+X_test, X_train = np.split(X, [int(0.15 * X.shape[0])])
 print("X_test", X_test.shape, "X_train", X_train.shape)
-XS_test, XS_train = np.split(XS, [int(0.2 * X.shape[0])])
+XS_test, XS_train = np.split(XS, [int(0.15 * X.shape[0])])
 print("XS_test", XS_test.shape, "XS_train", XS_train.shape)
-y_test, y_train = np.split(y, [int(0.2 * y.shape[0])])
+y_test, y_train = np.split(y, [int(0.15 * y.shape[0])])
 print("y_test", y_test.shape, "y_train", y_train.shape)
 
 # Convert class vectors to binary class matrices.
