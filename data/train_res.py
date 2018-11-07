@@ -37,7 +37,7 @@ early_stopper = EarlyStopping(min_delta=0.001, patience=10)
 csv_logger = CSVLogger('resnet18_cifar10.csv')
 model_checkpoint = ModelCheckpoint('./resnet.hdf5', monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='min', period=1)
 
-batch_size = 16
+batch_size = 32
 nb_classes = 3
 nb_epoch = 200
 data_augmentation = True
