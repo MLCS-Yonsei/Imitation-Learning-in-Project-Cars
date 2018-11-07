@@ -35,7 +35,7 @@ seq = iaa.Sequential([
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
 early_stopper = EarlyStopping(min_delta=0.001, patience=10)
 csv_logger = CSVLogger('resnet18_cifar10.csv')
-model_checkpoint = ModelCheckpoint('resnet.hdf5', monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+model_checkpoint = ModelCheckpoint('./resnet.hdf5', monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='min', period=1)
 
 batch_size = 16
 nb_classes = 3
