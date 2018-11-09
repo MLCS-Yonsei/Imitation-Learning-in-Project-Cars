@@ -171,30 +171,29 @@ class pCarsAutoController(mp.Process):
 
     def run(self):
         while True:
-            try:
-                message = self.r.hget('pcars_action'+local_ip,self.local_ip)
-                force_acc = self.r.hget('pcars_force_acc', self.local_ip)
 
-                if force_acc:
+            message = self.r.hget('pcars_action'+local_ip,self.local_ip)
+            force_acc = self.r.hget('pcars_force_acc', self.local_ip)
 
-                    if eval(force_acc) == True:
-                        self.accOn()
-                        
-                        self.r.hdel('pcars_force_acc',self.local_ip)
+            if force_acc:
 
-                if message:
-                    action = eval(message)
-                    if action is False:
-                        print("Control OFF")
-                        self.move_steer(0)
-                        self.brakeOff()
-                        self.accOff()
-                    else:
-                        self.action_parser(action)
+                if eval(force_acc) == True:
+                    self.accOn()
+                    
+                    self.r.hdel('pcars_force_acc',self.local_ip)
 
-                    self.r.hdel('pcars_action'+self.local_ip,self.local_ip)
-            except:
-                pass
+            if message:
+                action = eval(message)
+                if action is False:
+                    print("Control OFF")
+                    self.move_steer(0)
+                    self.brakeOff()
+                    self.accOff()
+                else:
+                    self.action_parser(action)
+
+                self.r.hdel('pcars_action'+self.local_ip,self.local_ip)
+            
 
 if __name__ == '__main__':
     ''' Getting Local IP of this Computer '''
