@@ -111,7 +111,7 @@ class screen_capture_thread(Thread):
             self.img = base64.b64encode(buf.getvalue()).decode("utf-8")
             result = False
             
-            # print(msg)
+            print(msg)
             if msg is not None:
                 if "participants" in msg:
                     if "worldPositionX" in msg["participants"][0]:
