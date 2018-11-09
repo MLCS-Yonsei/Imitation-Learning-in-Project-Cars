@@ -70,10 +70,29 @@ def remote_control(target_ip, redis_address):
         if message:
             # r.hdel('pcars_data'+target_ip,target_ip)
 
-            data, image = parse_message(message)
+            data, _image = parse_message(message)
 
-            speed = data["speed"]
-            print(speed)
+            image = np.zeros((1,150,200,3))
+            image[0] = _image
+
+            speed = np.zeros((1,1))
+            speed[0] = data["speed"]
+
+            result = model.predict([image,speed])
+
+            steer = result[0][0][0]
+            acc = result[1][0][0]
+            brake = result[2][0][0]
+
+            action = {
+                'steer':steer,
+                'acc':acc,
+                'brake':brake
+            }
+            print(action)
+            r.hset('pcars_action'+target_ip, target_ip, action)
+            
+
 
 if __name__ == "__main__":
     remote_control('165.132.108.169','redis.hwanmoo.kr')

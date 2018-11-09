@@ -207,15 +207,15 @@ if __name__ == '__main__':
     while True:
         try:
             message = r.hget('pcars_action'+local_ip,local_ip)
-            force_acc = r.hget('pcars_force_acc', local_ip)
+            # force_acc = r.hget('pcars_force_acc', local_ip)
 
-            if force_acc:
+            # if force_acc:
 
-                if eval(force_acc) == True:
-                    pc.accOn()
+            #     if eval(force_acc) == True:
+            #         pc.accOn()
                     
-                    r.hdel('pcars_force_acc',local_ip)
-
+            #         r.hdel('pcars_force_acc',local_ip)
+            print(message)
             if message:
                 action = eval(message)
                 if action is False:
