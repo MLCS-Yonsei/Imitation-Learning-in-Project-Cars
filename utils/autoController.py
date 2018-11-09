@@ -24,6 +24,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 
+import base64
+from io import BytesIO
+from PIL import Image
+
 class pCarsAutoController(mp.Process):
     def __init__(self):
         super(pCarsAutoController,self).__init__()
