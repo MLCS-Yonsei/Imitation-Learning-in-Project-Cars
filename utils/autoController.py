@@ -97,6 +97,7 @@ class pCarsAutoController(mp.Process):
             _s = data["unfilteredSteering"]/127
             _a = data["unfilteredThrottle"]/255
             _b = data["unfilteredBrake"]/255
+            _speed = data["speed"]
 
         if _brake < 0.08:
             _brake = 0
@@ -113,10 +114,16 @@ class pCarsAutoController(mp.Process):
             self.brakeOff()
 
         if _acc > 0:
-            if _a >= _acc:
-                self.accOff()
+            if _speed > 5:
+                if _a >= _acc:
+                    self.accOff()
+                else:
+                    self.accOn()
             else:
-                self.accOn()
+                if _acc > 0.1:
+                    self.accOn()
+                else:
+                    self.accOff()
         
     def steer_converter(self, n):
         # if n > 1:
