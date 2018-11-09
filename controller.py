@@ -178,6 +178,7 @@ def run_pac(r, local_ip):
             
             if message:
                 action = eval(message)
+                print(action)
                 if action is False:
                     print("Control OFF")
                     pc.move_steer(0)
