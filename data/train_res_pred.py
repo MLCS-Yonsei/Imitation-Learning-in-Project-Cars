@@ -1,0 +1,128 @@
+"""
+Adapted from keras example cifar10_cnn.py
+Train ResNet-18 on the CIFAR10 small images dataset.
+
+GPU run command with Theano backend (with TensorFlow, the GPU is automatically used):
+    THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX=float32 python cifar10.py
+"""
+from __future__ import print_function
+from keras.datasets import cifar10
+from keras.preprocessing.image import ImageDataGenerator
+from keras.utils import np_utils
+from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping, ModelCheckpoint
+
+import numpy as np
+import resnet
+from glob import glob
+
+import imgaug as ia
+from imgaug import augmenters as iaa
+
+st = lambda aug: iaa.Sometimes(0.4, aug)
+oc = lambda aug: iaa.Sometimes(0.3, aug)
+rl = lambda aug: iaa.Sometimes(0.09, aug)
+seq = iaa.Sequential([
+        rl(iaa.GaussianBlur((0, 1.5))), # blur images with a sigma between 0 and 1.5
+        rl(iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05), per_channel=0.5)), # add gaussian noise to images
+        oc(iaa.Dropout((0.0, 0.10), per_channel=0.5)), # randomly remove up to X% of the pixels
+        oc(iaa.CoarseDropout((0.0, 0.10), size_percent=(0.08, 0.2),per_channel=0.5)), # randomly remove up to X% of the pixels
+        oc(iaa.Add((-40, 40), per_channel=0.5)), # change brightness of images (by -X to Y of original value)
+        st(iaa.Multiply((0.10, 2.5), per_channel=0.2)), # change brightness of images (X-Y% of original value)
+        rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)), # improve or worsen the contrast
+        #rl(iaa.Grayscale((0.0, 1))), # put grayscale
+], random_order=True)
+
+
+
+batch_size = 32
+nb_classes = 3
+nb_epoch = 200
+data_augmentation = True
+
+# input image dimensions
+img_rows, img_cols = 150, 200
+# The CIFAR10 images are RGB.
+img_channels = 3
+
+# The data, shuffled and split between train and test sets:
+# (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+data_step_size = 200
+data_shift_size = 50
+data_cut_size = 50
+
+actual_data_step_size = data_step_size - data_shift_size - data_cut_size
+
+dataset = glob('./data/*.npz')
+_len = len(dataset)
+X = np.zeros((actual_data_step_size*_len,150,200,3))
+XS = np.zeros((actual_data_step_size*_len))
+y = np.zeros((actual_data_step_size*_len,3))
+for i, data in enumerate(dataset):
+    print(i,"/",_len)
+    _data = np.load(data)
+
+    X[actual_data_step_size*i:actual_data_step_size*(i+1)] = _data['image'][data_cut_size:data_step_size-data_shift_size,:,:,:]
+    XS[actual_data_step_size*i:actual_data_step_size*(i+1)] = _data['data'][data_cut_size+data_shift_size:data_step_size,7]
+    y[actual_data_step_size*i:actual_data_step_size*(i+1)] = _data['data'][data_cut_size+data_shift_size:data_step_size,0:3]
+
+X_test, X_train = np.split(X, [int(0.15 * X.shape[0])])
+print("X_test", X_test.shape, "X_train", X_train.shape)
+XS_test, XS_train = np.split(XS, [int(0.15 * X.shape[0])])
+print("XS_test", XS_test.shape, "XS_train", XS_train.shape)
+y_test, y_train = np.split(y, [int(0.15 * y.shape[0])])
+print("y_test", y_test.shape, "y_train", y_train.shape)
+
+lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
+early_stopper = EarlyStopping(min_delta=0.001, patience=10)
+csv_logger = CSVLogger('resnet18_cifar10.csv')
+
+if data_shift_size > 0:
+    model_checkpoint = ModelCheckpoint('./resnet_pred.hdf5', monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='min', period=1)
+else:
+    model_checkpoint = ModelCheckpoint('./resnet.hdf5', monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='min', period=1)
+
+# Convert class vectors to binary class matrices.
+# Y_train = np_utils.to_categorical(y_train, nb_classes)
+# Y_test = np_utils.to_categorical(y_test, nb_classes)
+
+# X_train = X_train.astype('float32')
+# X_test = X_test.astype('float32')
+
+# subtract mean and normalize
+# mean_image = np.mean(X_train, axis=0)
+# X_train -= mean_image
+# X_test -= mean_image
+# X_train /= 128.
+# X_test /= 128.
+
+model = resnet.ResnetBuilder.build_resnet_18((img_channels, img_rows, img_cols), nb_classes)
+model.compile(loss='mean_squared_error',
+              optimizer='adam',
+              metrics=['accuracy'])
+model_json = model.to_json()
+with open("model.json", "w") as json_file : 
+    json_file.write(model_json)
+
+
+exit(-1)
+if data_augmentation:
+    print('Using data augmentation.')
+    # X_train = seq.augment_images(X_train)
+    print('Done')
+    model.fit([X_train, XS_train], np.split(y_train,3,axis=1),
+              batch_size=batch_size,
+              nb_epoch=nb_epoch,
+              validation_data=([X_test, XS_test], np.split(y_test,3,axis=1)),
+              shuffle=True,
+              callbacks=[lr_reducer, early_stopper, csv_logger, model_checkpoint])
+else:
+    print('Using real-time data augmentation.')
+    # This will do preprocessing and realtime data augmentation:
+
+
+    # Fit the model on the batches generated by datagen.flow().
+    model.fit_generator(datagen.flow([X_train, XS_train], y_train, batch_size=batch_size),
+                        steps_per_epoch=X_train.shape[0] // batch_size,
+                        validation_data=([X_test, XS_train], y_test),
+                        epochs=nb_epoch, verbose=1, max_q_size=100,
+                        callbacks=[lr_reducer, early_stopper, csv_logger, model_checkpoint])

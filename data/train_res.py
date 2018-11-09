@@ -87,7 +87,12 @@ model = resnet.ResnetBuilder.build_resnet_18((img_channels, img_rows, img_cols),
 model.compile(loss='mean_squared_error',
               optimizer='adam',
               metrics=['accuracy'])
+model_json = model.to_json()
+with open("model.json", "w") as json_file : 
+    json_file.write(model_json)
 
+
+exit(-1)
 if data_augmentation:
     print('Using data augmentation.')
     # X_train = seq.augment_images(X_train)
