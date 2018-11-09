@@ -105,7 +105,7 @@ class pCarsAutoController(mp.Process):
             if _a >= _acc:
                 self.accOff()
             else:
-                self.accOn:
+                self.accOn()
         
     def steer_converter(self, n):
         # if n > 1:
