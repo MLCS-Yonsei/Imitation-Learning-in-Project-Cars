@@ -37,7 +37,7 @@ class pCarsAutoController(mp.Process):
             'hand_brake': False,
             'steer': 0
         }
-        
+
         self.keys = Keys()
 
         ''' Getting Local IP of this Computer '''
@@ -88,7 +88,7 @@ class pCarsAutoController(mp.Process):
         
         message = self.r.hget('pcars_data'+self.local_ip,self.local_ip)
         if message:
-            data, _ = parse_message(message)
+            data, _ = self.parse_message(message)
 
             _s = data["unfilteredSteering"]/127
             _a = data["unfilteredThrottle"]/255
