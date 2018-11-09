@@ -83,9 +83,9 @@ class pCarsAutoController(mp.Process):
         if message:
             data, _ = parse_message(message)
 
-            _s = data["unfilteredInput"]["unfilteredSteering"]/127
-            _a = data["unfilteredInput"]["unfilteredThrottle"]/255
-            _b = data["unfilteredInput"]["unfilteredBrake"]/255
+            _s = data["unfilteredSteering"]/127
+            _a = data["unfilteredThrottle"]/255
+            _b = data["unfilteredBrake"]/255
 
         if _brake < 0.08:
             _brake = 0

@@ -32,6 +32,10 @@ def remote_control(target_ip, redis_address):
     import numpy as np
     import redis
 
+    import base64
+    from io import BytesIO
+    from PIL import Image
+
     json_file = open("../model/model.json", "r") 
     loaded_model_json = json_file.read() 
     json_file.close() 
@@ -41,7 +45,7 @@ def remote_control(target_ip, redis_address):
 
     r = redis.StrictRedis(host=redis_address, port=6379, db=1)
 
-    def parse_message(self,message):
+    def parse_message(message):
         # Parse message from data_sender.py via redis
         message = message.decode("utf-8")
         message = message.replace('<','\'<')
@@ -62,13 +66,14 @@ def remote_control(target_ip, redis_address):
 
     while True:
         message = r.hget('pcars_data'+target_ip,target_ip)
-        print(message)
+        # print(message)
         if message:
             # r.hdel('pcars_data'+target_ip,target_ip)
 
             data, image = parse_message(message)
 
-            print(data)
+            speed = data["speed"]
+            print(speed)
 
 if __name__ == "__main__":
     remote_control('165.132.108.169','redis.hwanmoo.kr')
