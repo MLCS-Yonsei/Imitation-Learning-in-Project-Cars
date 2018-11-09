@@ -31,6 +31,13 @@ class pCarsAutoController(mp.Process):
         self.get_focus()
         self.status = 'active'
 
+        self.controlState = {
+            'acc': False,
+            'brake': False,
+            'hand_brake': False,
+            'steer': 0
+        }
+        
         self.keys = Keys()
 
         ''' Getting Local IP of this Computer '''
