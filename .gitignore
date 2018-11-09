@@ -6,3 +6,4 @@ test/*
 data/Data/*
 *.hdf5
 
+*.local

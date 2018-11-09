@@ -1,0 +1,12 @@
+Metadata-Version: 1.0
+Name: pcars
+Version: 0.1.0.dev0
+Summary: Project CARS UDP feed client
+Home-page: https://github.com/jamesremuscat/pcars
+Author: James Muscat
+Author-email: jamesremuscat@gmail.com
+License: UNKNOWN
+Description: 
+              pcars is a Python client for Project CARS's UDP data feed.
+              
+Platform: UNKNOWN
